@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My List - Netflex</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary-red: #E50914;
+            --dark-bg: #141414;
+            --darker-bg: #0a0a0a;
+            --card-bg: #1f1f1f;
+            --text-white: #ffffff;
+            --text-gray: #b3b3b3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1a0000 0%, var(--darker-bg) 50%);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-white);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(229, 9, 20, 0.1);
+        }
+
+        .logo h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-red);
+            letter-spacing: -1px;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-white);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a.active {
+            color: var(--primary-red);
+        }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-red);
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-top: 100px;
+            padding: 2rem 4rem;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-red) 0%, #ff6b6b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            color: var(--text-gray);
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            padding: 2rem 4rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.7rem 2rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            color: var(--text-white);
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary-red);
+            background: rgba(229, 9, 20, 0.1);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-red);
+            border-color: var(--primary-red);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            display: none;
+        }
+
+        .empty-state.show {
+            display: block;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-state h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-gray);
+        }
+
+        .empty-state p {
+            color: var(--text-gray);
+            font-size: 1.1rem;
+        }
+
+        /* List Container */
+        .list-container {
+            padding: 2rem 4rem;
+        }
+
+        .list-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .list-item {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .list-item:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-red);
+            box-shadow: 0 20px 40px rgba(229, 9, 20, 0.3);
+        }
+
+        .list-item img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+
+        .item-overlay {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 1rem;
+        }
+
+        .remove-btn {
+            background: rgba(0, 0, 0, 0.8);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .remove-btn:hover {
+            background: var(--primary-red);
+            transform: scale(1.1);
+        }
+
+        .item-info {
+            padding: 1.5rem;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.9) 50%);
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .item-info h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .rating {
+            background: var(--primary-red);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .type-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 2rem 4rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(229, 9, 20, 0.1);
+            border: 2px solid rgba(229, 9, 20, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(229, 9, 20, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-red);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-gray);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem 1.5rem;
+            }
+
+            .page-header, .filter-tabs, .list-container, .stats {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .list-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>NETFLEX</h1>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="movies.html">Movies</a>
+            <a href="series.html">Series</a>
+            <a href="mylist.html" class="active">My List</a>
+        </nav>
+    </header>
+
+    <div class="page-header">
+        <h1>❤️ My List</h1>
+        <p>Your personal collection of favorites</p>
+    </div>
+
+    <div class="stats" id="stats">
+        <div class="stat-card">
+            <div class="stat-number" id="total-items">0</div>
+            <div class="stat-label">Total Items</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="total-movies">0</div>
+            <div class="stat-label">Movies</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="total-series">0</div>
+            <div class="stat-label">Series</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="avg-rating">0.0</div>
+            <div class="stat-label">Avg Rating</div>
+        </div>
+    </div>
+
+    <div class="filter-tabs">
+        <button class="tab-btn active" data-filter="all">All</button>
+        <button class="tab-btn" data-filter="movie">Movies</button>
+        <button class="tab-btn" data-filter="tv">TV Series</button>
+        <button class="tab-btn" data-filter="high-rated">High Rated (8+)</button>
+    </div>
+
+    <div class="empty-state" id="empty-state">
+        <div class="empty-icon">📺</div>
+        <h2>Your list is empty</h2>
+        <p>Start adding your favorite movies and series!</p>
+    </div>
+
+    <div class="list-container">
+        <div class="list-grid" id="my-list"></div>
+    </div>
+
+    <script>
+        const API_KEY = '3fd2be6f0c70a2a598f084ddfb75487c';
+        const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
+        
+        let myList = [];
+        let currentFilter = 'all';
+
+        // Initialize with sample data
+        async function initializeList() {
+            // Fetch some popular movies and TV shows as sample data
+            const movieRes = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&page=1`);
+            const movieData = await movieRes.json();
+            
+            const tvRes = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${API_KEY}&page=1`);
+            const tvData = await tvRes.json();
+
+            // Add first 3 movies and 3 TV shows to the list
+            myList = [
+                ...movieData.results.slice(0, 3).map(item => ({...item, media_type: 'movie'})),
+                ...tvData.results.slice(0, 3).map(item => ({...item, media_type: 'tv'}))
+            ];
+
+            displayList();
+            updateStats();
+        }
+
+        function displayList() {
+            const container = document.getElementById('my-list');
+            const emptyState = document.getElementById('empty-state');
+            
+            let filteredList = myList;
+
+            // Apply filters
+            if (currentFilter === 'movie') {
+                filteredList = myList.filter(item => item.media_type === 'movie');
+            } else if (currentFilter === 'tv') {
+                filteredList = myList.filter(item => item.media_type === 'tv');
+            } else if (currentFilter === 'high-rated') {
+                filteredList = myList.filter(item => item.vote_average >= 8);
+            }
+
+            if (filteredList.length === 0) {
+                emptyState.classList.add('show');
+                container.innerHTML = '';
+                return;
+            }
+
+            emptyState.classList.remove('show');
+            container.innerHTML = '';
+
+            filteredList.forEach((item, index) => {
+                const title = item.title || item.name;
+                const date = item.release_date || item.first_air_date;
+                const year = date ? date.split('-')[0] : 'N/A';
+                const type = item.media_type === 'movie' ? 'Movie' : 'TV Series';
+
+                const card = document.createElement('div');
+                card.classList.add('list-item');
+                card.innerHTML = `
+                    <img src="${IMG_PATH + item.poster_path}" alt="${title}">
+                    <div class="item-overlay">
+                        <button class="remove-btn" onclick="removeFromList(${index})">✕</button>
+                    </div>
+                    <div class="item-info">
+                        <h3>${title}</h3>
+                        <div class="item-meta">
+                            <span class="type-badge">${type}</span>
+                            <span>${year}</span>
+                            <span class="rating">★ ${item.vote_average.toFixed(1)}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function removeFromList(index) {
+            myList.splice(index, 1);
+            displayList();
+            updateStats();
+        }
+
+        function updateStats() {
+            const movies = myList.filter(item => item.media_type === 'movie').length;
+            const series = myList.filter(item => item.media_type === 'tv').length;
+            const avgRating = myList.length > 0 
+                ? (myList.reduce((sum, item) => sum + item.vote_average, 0) / myList.length).toFixed(1)
+                : '0.0';
+
+            document.getElementById('total-items').textContent = myList.length;
+            document.getElementById('total-movies').textContent = movies;
+            document.getElementById('total-series').textContent = series;
+            document.getElementById('avg-rating').textContent = avgRating;
+        }
+
+        // Filter tabs
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.getAttribute('data-filter');
+                displayList();
+            });
+        });
+
+        // Initialize on load
+        initializeList();
+    </script>
+</body>
+</html>
